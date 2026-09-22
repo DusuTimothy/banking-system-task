@@ -3,7 +3,7 @@
 A simple banking system REST API built with **Node.js**, **Express**, **Zod** (validation),
 **CORS**, **express-rate-limit**, and an **in-memory dummy database** (no real DB required).
 
-> ⚠️ Data is stored in plain JS arrays in memory (`src/data/stores/`). It resets every time
+> Data is stored in plain JS arrays in memory (`src/data/stores.js`). It resets every time
 > the server restarts and is not shared across multiple instances/processes. Swap it for a
 > real database later without touching controllers or routes — just reimplement the functions
 > re-exported from `src/data/db.js`.
@@ -23,9 +23,9 @@ A simple banking system REST API built with **Node.js**, **Express**, **Zod** (v
 
 ## Architecture note
 
-Each function lives in its own file (one function = one module). Barrel files
-(`db.js`, `*Controller.js`, `hash.js`, etc.) re-export those modules so routes and
-other callers keep the same import paths.
+Feature logic is split into focused one-function modules. A few barrels
+(`db.js`, `userController.js`, `hash.js`, `authSchema.js`) re-export related modules so
+callers can import a stable facade where that helps.
 
 ## Project structure
 
@@ -36,13 +36,10 @@ banking-system-task/
 └── src/
     ├── server.js                          # entrypoint
     ├── serverHandlers/
-    │   ├── onListen.js
     │   └── onUnhandledRejection.js
     ├── app.js                             # express app: middleware + route mounting
     ├── data/
-    │   ├── stores/
-    │   │   ├── usersStore.js              # in-memory users array
-    │   │   └── transactionsStore.js       # in-memory transactions array
+    │   ├── stores.js                      # in-memory users + transactions arrays
     │   ├── generateAccountNumber.js
     │   ├── createUser.js
     │   ├── findUserByEmail.js
@@ -64,24 +61,18 @@ banking-system-task/
     │   ├── transaction/
     │   │   ├── transferSchema.js
     │   │   └── searchQuerySchema.js
-    │   ├── authSchema.js                  # barrel
-    │   └── transactionSchema.js           # barrel
+    │   └── authSchema.js                  # barrel
     ├── middlewares/
     │   ├── authenticate.js
     │   ├── authorize.js
     │   ├── validate.js
-    │   ├── notFound.js
     │   ├── errorHandler.js
     │   ├── corsOrigin.js
-    │   ├── limiters/
-    │   │   ├── generalLimiter.js
-    │   │   ├── authLimiter.js
-    │   │   └── transferLimiter.js
-    │   ├── authentication.js              # barrel → authenticate
-    │   ├── authorization.js               # barrel → authorize
-    │   └── rateLimiter.js                 # barrel → limiters
+    │   └── limiters/
+    │       ├── generalLimiter.js
+    │       ├── authLimiter.js
+    │       └── transferLimiter.js
     ├── controllers/
-    │   ├── healthCheck.js
     │   ├── auth/
     │   │   ├── register.js
     │   │   └── login.js
@@ -94,9 +85,7 @@ banking-system-task/
     │   ├── transaction/
     │   │   ├── transfer.js
     │   │   └── history.js
-    │   ├── authController.js              # barrel
-    │   ├── userController.js              # barrel
-    │   └── transactionController.js       # barrel
+    │   └── userController.js              # barrel
     ├── routes/
     │   ├── authRoutes.js
     │   ├── userRoutes.js
@@ -109,9 +98,7 @@ banking-system-task/
         │   └── comparePin.js
         ├── hash.js                        # barrel
         ├── signToken.js
-        ├── jwt.js                         # barrel → signToken
-        ├── toPublicUser.js
-        └── serialize.js                   # barrel → toPublicUser
+        └── toPublicUser.js
 ```
 
 ## Setup
@@ -129,29 +116,35 @@ store is ready as soon as the process starts.
 
 All request bodies are JSON. All protected routes require `Authorization: Bearer <token>`.
 
+### Health
+
+| Method | Route     | Notes                |
+|--------|-----------|----------------------|
+| GET    | `/health` | Liveness check (`OK`) |
+
 ### Auth
 
-| Method | Route              | Body                                      | Notes                        |
-|--------|---------------------|--------------------------------------------|-------------------------------|
-| POST   | `/api/auth/register` | `fullName, email, password`                | Password needs upper/lower/digit, 8+ chars |
-| POST   | `/api/auth/login`    | `email, password`                          | Returns `{ user, token }`    |
+| Method | Route                | Body                         | Notes                                      |
+|--------|----------------------|------------------------------|--------------------------------------------|
+| POST   | `/api/auth/register` | `fullName, email, password`  | Password needs upper/lower/digit, 8+ chars |
+| POST   | `/api/auth/login`    | `email, password`            | Returns `{ user, token }`                  |
 
 ### Users (protected)
 
-| Method | Route                | Body / Query                     | Notes                                   |
-|--------|------------------------|-----------------------------------|-------------------------------------------|
-| GET    | `/api/users/me`         | —                                  | Current user profile                     |
-| GET    | `/api/users/balance`    | —                                  | `{ balance, accountNumber }`             |
-| GET    | `/api/users/search?q=`  | query: `q` (required), `limit` (opt) | Search users by name/email/account number |
-| POST   | `/api/users/pin`        | `pin` (4 digits)                  | Create PIN (only if none set yet)         |
-| PATCH  | `/api/users/pin`        | `currentPin, newPin`              | Update existing PIN                       |
+| Method | Route                   | Body / Query                            | Notes                                         |
+|--------|-------------------------|-----------------------------------------|-----------------------------------------------|
+| GET    | `/api/users/me`         | —                                       | Current user profile                          |
+| GET    | `/api/users/balance`    | —                                       | `{ balance, accountNumber }`                  |
+| GET    | `/api/users/search?q=`  | query: `q` (required), `limit` (opt)    | Search users by name/email/account number     |
+| POST   | `/api/users/pin`        | `pin` (4 digits)                        | Create PIN (only if none set yet)             |
+| PATCH  | `/api/users/pin`        | `currentPin, newPin`                    | Update existing PIN                           |
 
 ### Transactions (protected)
 
-| Method | Route                       | Body                                              | Notes                                    |
-|--------|-------------------------------|-----------------------------------------------------|---------------------------------------------|
-| POST   | `/api/transactions/transfer`   | `toAccountNumber, amount, pin, note?`               | Debits sender, credits recipient, requires PIN |
-| GET    | `/api/transactions/history`    | —                                                    | All transactions involving the current user |
+| Method | Route                        | Body                                | Notes                                              |
+|--------|------------------------------|-------------------------------------|----------------------------------------------------|
+| POST   | `/api/transactions/transfer` | `toAccountNumber, amount, pin, note?` | Debits sender, credits recipient, requires PIN   |
+| GET    | `/api/transactions/history`  | —                                   | All transactions involving the current user        |
 
 ## How a transfer stays consistent without a real DB
 
