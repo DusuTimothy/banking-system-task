@@ -122,7 +122,7 @@ cp .env.example .env      # then edit JWT_SECRET, ALLOWED_ORIGINS, etc.
 npm run dev                # or: npm start
 ```
 
-Server boots on `http://localhost:5000` by default. No database setup step — the dummy
+Server boots on `http://localhost:PORT` by default. No database setup step — the dummy
 store is ready as soon as the process starts.
 
 ## API reference
