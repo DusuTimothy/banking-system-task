@@ -1,4 +1,4 @@
-const transactions = require("./stores/transactionsStore");
+const { transactions } = require("./stores");
 const { createTransaction } = require("./createTransaction");
 const { getTransactionsForUser } = require("./getTransactionsForUser");
 const { transferFunds } = require("./transferFunds");

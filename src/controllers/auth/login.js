@@ -1,7 +1,7 @@
 const db = require("../../data/db");
 const { comparePassword } = require("../../utils/hash");
-const { signToken } = require("../../utils/jwt");
-const { toPublicUser } = require("../../utils/serialize");
+const { signToken } = require("../../utils/signToken");
+const { toPublicUser } = require("../../utils/toPublicUser");
 
 async function login(req, res, next) {
   try {
@@ -18,11 +18,12 @@ async function login(req, res, next) {
     }
 
     const token = signToken(user.id);
+    const { createdAt, ...publicUser } = toPublicUser(user);
 
     res.status(200).json({
       success: true,
       message: "Logged in successfully",
-      data: { user: toPublicUser(user), token },
+      data: { user: publicUser, token },
     });
   } catch (err) {
     next(err);

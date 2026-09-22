@@ -1,5 +1,5 @@
 const db = require("../../data/db");
-const { toPublicUser } = require("../../utils/serialize");
+const { toPublicUser } = require("../../utils/toPublicUser");
 
 async function search(req, res, next) {
   try {

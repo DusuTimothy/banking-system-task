@@ -1,10 +1,11 @@
 const express = require("express");
-const { transfer, history } = require("../controllers/transactionController");
-const { authenticate } = require("../middlewares/authentication");
-const { authorize } = require("../middlewares/authorization");
+const { transfer } = require("../controllers/transaction/transfer");
+const { history } = require("../controllers/transaction/history");
+const { authenticate } = require("../middlewares/authenticate");
+const { authorize } = require("../middlewares/authorize");
 const validate = require("../middlewares/validate");
-const { transferSchema } = require("../schemas/transactionSchema");
-const { transferLimiter } = require("../middlewares/rateLimiter");
+const { transferSchema } = require("../schemas/transaction/transferSchema");
+const { transferLimiter } = require("../middlewares/limiters/transferLimiter");
 
 const router = express.Router();
 

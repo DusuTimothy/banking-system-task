@@ -1,4 +1,4 @@
-const users = require("./stores/usersStore");
+const { users } = require("./stores");
 const { createUser } = require("./createUser");
 const { findUserByEmail } = require("./findUserByEmail");
 const { findUserById } = require("./findUserById");

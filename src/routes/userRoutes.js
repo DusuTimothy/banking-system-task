@@ -1,11 +1,11 @@
 const express = require("express");
 const { getMe, getBalance, createPin, updatePin, search } = require("../controllers/userController");
-const { authenticate } = require("../middlewares/authentication");
-const { authorize } = require("../middlewares/authorization");
+const { authenticate } = require("../middlewares/authenticate");
+const { authorize } = require("../middlewares/authorize");
 const validate = require("../middlewares/validate");
 const { createPinSchema, updatePinSchema } = require("../schemas/authSchema");
-const { searchQuerySchema } = require("../schemas/transactionSchema");
-const { authLimiter } = require("../middlewares/rateLimiter");
+const { searchQuerySchema } = require("../schemas/transaction/searchQuerySchema");
+const { authLimiter } = require("../middlewares/limiters/authLimiter");
 
 const router = express.Router();
 

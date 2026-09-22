@@ -1,4 +1,4 @@
-const users = require("./stores/usersStore");
+const { users } = require("./stores");
 
 function searchUsers(query, { excludeId, limit = 20 } = {}) {
   const q = (query || "").trim().toLowerCase();

@@ -1,5 +1,5 @@
 const crypto = require("crypto");
-const users = require("./stores/usersStore");
+const { users } = require("./stores");
 const { generateAccountNumber } = require("./generateAccountNumber");
 
 function createUser({ fullName, email, passwordHash }) {

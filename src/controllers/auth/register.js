@@ -1,7 +1,6 @@
 const db = require("../../data/db");
 const { hashPassword } = require("../../utils/hash");
-const { signToken } = require("../../utils/jwt");
-const { toPublicUser } = require("../../utils/serialize");
+const { toPublicUser } = require("../../utils/toPublicUser");
 
 async function register(req, res, next) {
   try {
@@ -13,12 +12,11 @@ async function register(req, res, next) {
 
     const passwordHash = await hashPassword(password);
     const user = db.createUser({ fullName, email, passwordHash });
-    const token = signToken(user.id);
 
     res.status(201).json({
       success: true,
       message: "Account created successfully",
-      data: { user: toPublicUser(user), token },
+      data: { user: toPublicUser(user) },
     });
   } catch (err) {
     next(err);

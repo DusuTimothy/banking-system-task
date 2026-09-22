@@ -1,4 +1,4 @@
-const { toPublicUser } = require("../../utils/serialize");
+const { toPublicUser } = require("../../utils/toPublicUser");
 
 async function getMe(req, res, next) {
   try {
