@@ -4,7 +4,10 @@ const helmet = require("helmet");
 const morgan = require("morgan");
 
 const { generalLimiter } = require("./middlewares/rateLimiter");
-const { notFound, errorHandler } = require("./middlewares/errorHandler");
+const { notFound } = require("./middlewares/notFound");
+const { errorHandler } = require("./middlewares/errorHandler");
+const { corsOrigin } = require("./middlewares/corsOrigin");
+const { healthCheck } = require("./controllers/healthCheck");
 
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
@@ -24,13 +27,7 @@ const allowedOrigins = (process.env.ALLOWED_ORIGINS || "")
 
 app.use(
   cors({
-    origin(origin, callback) {
-      // allow non-browser tools (no origin header) and whitelisted origins
-      if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-      return callback(new Error("Not allowed by CORS"));
-    },
+    origin: corsOrigin(allowedOrigins),
     credentials: true,
   })
 );
@@ -44,7 +41,7 @@ if (process.env.NODE_ENV !== "test") {
 app.use(generalLimiter);
 
 // ---- Health check ----
-app.get("/health", (req, res) => res.status(200).json({ success: true, message: "OK" }));
+app.get("/health", healthCheck);
 
 // ---- Routes ----
 app.use("/api/auth", authRoutes);

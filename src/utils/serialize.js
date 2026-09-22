@@ -1,7 +1,3 @@
-function toPublicUser(user) {
-  if (!user) return null;
-  const { passwordHash, pinHash, ...publicFields } = user;
-  return { ...publicFields, hasPin: Boolean(pinHash) };
-}
+const { toPublicUser } = require("./toPublicUser");
 
 module.exports = { toPublicUser };

@@ -1,7 +1,3 @@
-function notFound(req, res, next) {
-  res.status(404).json({ success: false, message: `Route not found: ${req.method} ${req.originalUrl}` });
-}
-
 // eslint-disable-next-line no-unused-vars
 function errorHandler(err, req, res, next) {
   const statusCode = err.statusCode || 500;
@@ -13,4 +9,4 @@ function errorHandler(err, req, res, next) {
   });
 }
 
-module.exports = { notFound, errorHandler };
+module.exports = { errorHandler };

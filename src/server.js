@@ -1,13 +1,10 @@
 require("dotenv").config();
 const app = require("./app");
+const { onListen } = require("./serverHandlers/onListen");
+const { onUnhandledRejection } = require("./serverHandlers/onUnhandledRejection");
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`Banking system API running on port ${PORT}`);
-});
+app.listen(PORT, () => onListen(PORT));
 
-process.on("unhandledRejection", (err) => {
-  console.error("Unhandled Rejection:", err);
-  process.exit(1);
-});
+process.on("unhandledRejection", onUnhandledRejection);
