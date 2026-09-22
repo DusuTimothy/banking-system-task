@@ -3,10 +3,10 @@
 A simple banking system REST API built with **Node.js**, **Express**, **Zod** (validation),
 **CORS**, **express-rate-limit**, and an **in-memory dummy database** (no real DB required).
 
-> ⚠️ Data is stored in a plain JS array in memory (`src/data/db.js`). It resets every time
+> ⚠️ Data is stored in plain JS arrays in memory (`src/data/stores/`). It resets every time
 > the server restarts and is not shared across multiple instances/processes. Swap it for a
 > real database later without touching controllers or routes — just reimplement the functions
-> exported from `src/data/db.js`.
+> re-exported from `src/data/db.js`.
 
 ## Features
 
@@ -21,38 +21,97 @@ A simple banking system REST API built with **Node.js**, **Express**, **Zod** (v
 - Zod request validation on every input-accepting route
 - Centralized error handling
 
+## Architecture note
+
+Each function lives in its own file (one function = one module). Barrel files
+(`db.js`, `*Controller.js`, `hash.js`, etc.) re-export those modules so routes and
+other callers keep the same import paths.
+
 ## Project structure
 
 ```
-banking-system/
+banking-system-task/
 ├── package.json
 ├── .env.example
 └── src/
-    ├── server.js               # entrypoint
-    ├── app.js                  # express app: middleware + route mounting
+    ├── server.js                          # entrypoint
+    ├── serverHandlers/
+    │   ├── onListen.js
+    │   └── onUnhandledRejection.js
+    ├── app.js                             # express app: middleware + route mounting
     ├── data/
-    │   └── db.js                # dummy in-memory "database" + transfer logic
+    │   ├── stores/
+    │   │   ├── usersStore.js              # in-memory users array
+    │   │   └── transactionsStore.js       # in-memory transactions array
+    │   ├── generateAccountNumber.js
+    │   ├── createUser.js
+    │   ├── findUserByEmail.js
+    │   ├── findUserById.js
+    │   ├── findUserByAccountNumber.js
+    │   ├── searchUsers.js
+    │   ├── createTransaction.js
+    │   ├── getTransactionsForUser.js
+    │   ├── transferFunds.js
+    │   ├── users.js                       # barrel: user store + user functions
+    │   ├── transactions.js                # barrel: tx store + tx functions
+    │   └── db.js                          # barrel: full data API facade
     ├── schemas/
-    │   ├── authSchema.js         # zod: register, login, create/update pin
-    │   └── transactionSchema.js  # zod: transfer, search query
+    │   ├── auth/
+    │   │   ├── registerSchema.js
+    │   │   ├── loginSchema.js
+    │   │   ├── createPinSchema.js
+    │   │   └── updatePinSchema.js
+    │   ├── transaction/
+    │   │   ├── transferSchema.js
+    │   │   └── searchQuerySchema.js
+    │   ├── authSchema.js                  # barrel
+    │   └── transactionSchema.js           # barrel
     ├── middlewares/
-    │   ├── validate.js           # generic zod-validation middleware
-    │   ├── authentication.js     # JWT identity verification
-    │   ├── authorization.js      # access-control (role) checks
-    │   ├── rateLimiter.js        # general / auth / transfer limiters
-    │   └── errorHandler.js       # 404 + centralized error handler
+    │   ├── authenticate.js
+    │   ├── authorize.js
+    │   ├── validate.js
+    │   ├── notFound.js
+    │   ├── errorHandler.js
+    │   ├── corsOrigin.js
+    │   ├── limiters/
+    │   │   ├── generalLimiter.js
+    │   │   ├── authLimiter.js
+    │   │   └── transferLimiter.js
+    │   ├── authentication.js              # barrel → authenticate
+    │   ├── authorization.js               # barrel → authorize
+    │   └── rateLimiter.js                 # barrel → limiters
     ├── controllers/
-    │   ├── authController.js     # register, login
-    │   ├── userController.js     # me, balance, pin, search
-    │   └── transactionController.js # transfer, history
+    │   ├── healthCheck.js
+    │   ├── auth/
+    │   │   ├── register.js
+    │   │   └── login.js
+    │   ├── user/
+    │   │   ├── getMe.js
+    │   │   ├── getBalance.js
+    │   │   ├── createPin.js
+    │   │   ├── updatePin.js
+    │   │   └── search.js
+    │   ├── transaction/
+    │   │   ├── transfer.js
+    │   │   └── history.js
+    │   ├── authController.js              # barrel
+    │   ├── userController.js              # barrel
+    │   └── transactionController.js       # barrel
     ├── routes/
     │   ├── authRoutes.js
     │   ├── userRoutes.js
     │   └── transactionRoutes.js
     └── utils/
-        ├── jwt.js                # sign JWT
-        ├── hash.js                # bcrypt password/pin hashing
-        └── serialize.js           # strip password/pin hashes before responding
+        ├── hash/
+        │   ├── hashPassword.js
+        │   ├── comparePassword.js
+        │   ├── hashPin.js
+        │   └── comparePin.js
+        ├── hash.js                        # barrel
+        ├── signToken.js
+        ├── jwt.js                         # barrel → signToken
+        ├── toPublicUser.js
+        └── serialize.js                   # barrel → toPublicUser
 ```
 
 ## Setup
@@ -96,15 +155,15 @@ All request bodies are JSON. All protected routes require `Authorization: Bearer
 
 ## How a transfer stays consistent without a real DB
 
-`db.transferFunds()` in `src/data/db.js` reads both balances, validates them, and writes
-both updates in one synchronous block — no `await` in between. Since Node runs your JS on
-a single thread, no other request can interleave mid-transfer, so both balances update
-together or not at all (e.g. if the sender has insufficient funds, nothing is written).
+`transferFunds()` in `src/data/transferFunds.js` (re-exported via `src/data/db.js`) reads
+both balances, validates them, and writes both updates in one synchronous block — no
+`await` in between. Since Node runs your JS on a single thread, no other request can
+interleave mid-transfer, so both balances update together or not at all (e.g. if the
+sender has insufficient funds, nothing is written).
 
 ## Swapping in a real database later
 
-Everything outside `src/data/db.js` talks to that module's exported functions
+Everything outside `src/data/` talks to `db.js`'s exported functions
 (`createUser`, `findUserByEmail`, `transferFunds`, etc.), not to a raw array. To move to
-Postgres/Mongo/etc., reimplement those functions against your real DB (making
+Postgres/Mongo/etc., reimplement those one-function modules against your real DB (making
 `transferFunds` a proper DB transaction) — controllers and routes don't need to change.
-# banking-system-task
