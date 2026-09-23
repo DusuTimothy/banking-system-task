@@ -3,10 +3,11 @@
 A simple banking system REST API built with **Node.js**, **Express**, **Zod** (validation),
 **CORS**, **express-rate-limit**, and an **in-memory dummy database** (no real DB required).
 
-> Data is stored in plain JS arrays in memory (`src/data/stores.js`). It resets every time
-> the server restarts and is not shared across multiple instances/processes. Swap it for a
-> real database later without touching controllers or routes — just reimplement the functions
-> re-exported from `src/data/db.js`.
+> Data is stored in plain JS arrays in memory (`users` in `src/data/users.js`,
+> `transactions` in `src/data/transactions.js`). It resets every time the server restarts
+> and is not shared across multiple instances/processes. Swap it for a real database later
+> without touching controllers or routes — just reimplement the functions re-exported from
+> `src/data/db.js`.
 
 ## Features
 
@@ -23,9 +24,8 @@ A simple banking system REST API built with **Node.js**, **Express**, **Zod** (v
 
 ## Architecture note
 
-Feature logic is split into focused one-function modules. A few barrels
-(`db.js`, `userController.js`, `hash.js`, `authSchema.js`) re-export related modules so
-callers can import a stable facade where that helps.
+Feature logic is split into focused modules. `db.js` re-exports the data layer so callers
+can import a stable facade.
 
 ## Project structure
 
@@ -35,37 +35,31 @@ banking-system-task/
 ├── .env.example
 └── src/
     ├── server.js                          # entrypoint
-    ├── serverHandlers/
-    │   └── onUnhandledRejection.js
     ├── app.js                             # express app: middleware + route mounting
     ├── data/
-    │   ├── stores.js                      # in-memory users + transactions arrays
     │   ├── generateAccountNumber.js
     │   ├── createUser.js
     │   ├── findUserByEmail.js
-    │   ├── findUserById.js
-    │   ├── findUserByAccountNumber.js
     │   ├── searchUsers.js
     │   ├── createTransaction.js
     │   ├── getTransactionsForUser.js
     │   ├── transferFunds.js
     │   ├── depositFunds.js
     │   ├── withdrawFunds.js
-    │   ├── users.js                       # barrel: user store + user functions
-    │   ├── transactions.js                # barrel: tx store + tx functions
-    │   └── db.js                          # barrel: full data API facade
+    │   ├── users.js                       # user store + finders + toPublicUser
+    │   ├── transactions.js                # tx store + tx functions
+    │   └── db.js                          # full data API facade
     ├── schemas/
     │   ├── auth/
     │   │   ├── registerSchema.js
     │   │   ├── loginSchema.js
     │   │   ├── createPinSchema.js
     │   │   └── updatePinSchema.js
-    │   ├── transaction/
-    │   │   ├── transferSchema.js
-    │   │   ├── depositSchema.js
-    │   │   ├── withdrawSchema.js
-    │   │   └── searchQuerySchema.js
-    │   └── authSchema.js                  # barrel
+    │   └── transaction/
+    │       ├── transferSchema.js
+    │       ├── depositSchema.js
+    │       ├── withdrawSchema.js
+    │       └── searchQuerySchema.js
     ├── middlewares/
     │   ├── authenticate.js
     │   ├── authorize.js
@@ -88,25 +82,18 @@ banking-system-task/
     │   │   ├── createPin.js
     │   │   ├── updatePin.js
     │   │   └── search.js
-    │   ├── transaction/
-    │   │   ├── transfer.js
-    │   │   ├── deposit.js
-    │   │   ├── withdraw.js
-    │   │   └── history.js
-    │   └── userController.js              # barrel
+    │   └── transaction/
+    │       ├── transfer.js
+    │       ├── deposit.js
+    │       ├── withdraw.js
+    │       └── history.js
     ├── routes/
     │   ├── authRoutes.js
     │   ├── userRoutes.js
     │   └── transactionRoutes.js
     └── utils/
-        ├── hash/
-        │   ├── hashPassword.js
-        │   ├── comparePassword.js
-        │   ├── hashPin.js
-        │   └── comparePin.js
-        ├── hash.js                        # barrel
-        ├── signToken.js
-        └── toPublicUser.js
+        ├── hash.js                        # password + PIN hash/compare
+        └── signToken.js
 ```
 
 ## Setup

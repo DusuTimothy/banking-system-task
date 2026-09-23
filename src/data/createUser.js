@@ -1,5 +1,5 @@
 const crypto = require("crypto");
-const { users } = require("./stores");
+const { users } = require("./users");
 const { generateAccountNumber } = require("./generateAccountNumber");
 
 function createUser({ fullName, email, passwordHash }) {
@@ -11,8 +11,8 @@ function createUser({ fullName, email, passwordHash }) {
     pinHash: null, // set later via "create pin"
     balance: 0,
     accountNumber: generateAccountNumber(),
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
+    createdAt: new Date(),
+    updatedAt: new Date(),
   };
   users.push(user);
   return user;

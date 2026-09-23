@@ -1,4 +1,4 @@
-const { findUserById } = require("./findUserById");
+const { findUserById } = require("./users");
 const { createTransaction } = require("./createTransaction");
 
 function depositFunds({ userId, amount }) {

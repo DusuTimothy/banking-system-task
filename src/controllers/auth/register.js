@@ -1,6 +1,5 @@
 const db = require("../../data/db");
 const { hashPassword } = require("../../utils/hash");
-const { toPublicUser } = require("../../utils/toPublicUser");
 
 async function register(req, res, next) {
   try {
@@ -16,7 +15,7 @@ async function register(req, res, next) {
     res.status(201).json({
       success: true,
       message: "Account created successfully",
-      data: { user: toPublicUser(user) },
+      data: { user: db.toPublicUser(user) },
     });
   } catch (err) {
     next(err);

@@ -1,5 +1,4 @@
 const db = require("../../data/db");
-const { toPublicUser } = require("../../utils/toPublicUser");
 
 async function search(req, res, next) {
   try {
@@ -8,7 +7,7 @@ async function search(req, res, next) {
 
     res.status(200).json({
       success: true,
-      data: { results: results.map(toPublicUser), count: results.length },
+      data: { results: results.map(db.toPublicUser), count: results.length },
     });
   } catch (err) {
     next(err);

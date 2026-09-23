@@ -1,4 +1,4 @@
-const { users } = require("./stores");
+const { users } = require("./users");
 
 function findUserByEmail(email) {
   if (!email) return undefined;

@@ -1,4 +1,4 @@
-const { transactions } = require("./stores");
+const { transactions } = require("./transactions");
 
 function getTransactionsForUser(userId) {
   return transactions

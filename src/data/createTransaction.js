@@ -1,5 +1,5 @@
 const crypto = require("crypto");
-const { transactions } = require("./stores");
+const { transactions } = require("./transactions");
 
 function createTransaction({ fromUserId, toUserId, amount, note }) {
   const tx = {

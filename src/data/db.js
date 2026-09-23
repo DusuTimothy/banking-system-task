@@ -5,6 +5,7 @@ const {
   findUserById,
   findUserByAccountNumber,
   searchUsers,
+  toPublicUser,
 } = require("./users");
 
 const {
@@ -24,6 +25,7 @@ module.exports = {
   findUserById,
   findUserByAccountNumber,
   searchUsers,
+  toPublicUser,
   createTransaction,
   getTransactionsForUser,
   transferFunds,

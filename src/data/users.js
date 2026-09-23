@@ -1,15 +1,26 @@
-const { users } = require("./stores");
+const users = [];
+
+function findUserById(id) {
+  return users.find((u) => u.id === id);
+}
+
+function findUserByAccountNumber(accountNumber) {
+  return users.find((u) => u.accountNumber === accountNumber);
+}
+
+function toPublicUser(user) {
+  if (!user) return null;
+  const { passwordHash, pinHash, ...publicFields } = user;
+  return { ...publicFields, hasPin: Boolean(pinHash) };
+}
+
+// Export store + helpers first so sibling modules can require without circular issues
+module.exports = { users, findUserById, findUserByAccountNumber, toPublicUser };
+
 const { createUser } = require("./createUser");
 const { findUserByEmail } = require("./findUserByEmail");
-const { findUserById } = require("./findUserById");
-const { findUserByAccountNumber } = require("./findUserByAccountNumber");
 const { searchUsers } = require("./searchUsers");
 
-module.exports = {
-  users,
-  createUser,
-  findUserByEmail,
-  findUserById,
-  findUserByAccountNumber,
-  searchUsers,
-};
+module.exports.createUser = createUser;
+module.exports.findUserByEmail = findUserByEmail;
+module.exports.searchUsers = searchUsers;

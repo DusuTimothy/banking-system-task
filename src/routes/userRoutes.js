@@ -1,9 +1,14 @@
 const express = require("express");
-const { getMe, getBalance, createPin, updatePin, search } = require("../controllers/userController");
+const { getMe } = require("../controllers/user/getMe");
+const { getBalance } = require("../controllers/user/getBalance");
+const { createPin } = require("../controllers/user/createPin");
+const { updatePin } = require("../controllers/user/updatePin");
+const { search } = require("../controllers/user/search");
 const { authenticate } = require("../middlewares/authenticate");
 const { authorize } = require("../middlewares/authorize");
 const validate = require("../middlewares/validate");
-const { createPinSchema, updatePinSchema } = require("../schemas/authSchema");
+const { createPinSchema } = require("../schemas/auth/createPinSchema");
+const { updatePinSchema } = require("../schemas/auth/updatePinSchema");
 const { searchQuerySchema } = require("../schemas/transaction/searchQuerySchema");
 const { authLimiter } = require("../middlewares/limiters/authLimiter");
 

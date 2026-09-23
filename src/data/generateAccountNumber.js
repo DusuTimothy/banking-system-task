@@ -1,4 +1,4 @@
-const { users } = require("./stores");
+const { users } = require("./users");
 
 function generateAccountNumber() {
   // 10-digit numeric account number, guaranteed unique within this dummy DB
