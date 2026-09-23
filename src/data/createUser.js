@@ -9,7 +9,7 @@ function createUser({ fullName, email, passwordHash }) {
     email: email.toLowerCase(),
     passwordHash,
     pinHash: null, // set later via "create pin"
-    balance: 2000,
+    balance: 0,
     accountNumber: generateAccountNumber(),
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
