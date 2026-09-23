@@ -1,14 +1,14 @@
 const rateLimit = require("express-rate-limit");
 
-const transferLimiter = rateLimit({
+const withdrawLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
   max: 5,
   standardHeaders: true,
   legacyHeaders: false,
   message: {
     success: false,
-    message: "Too many transfer attempts, try calm down.",
+    message: "Too many withdrawal attempts, try again later.",
   },
 });
 
-module.exports = { transferLimiter };
+module.exports = { withdrawLimiter };

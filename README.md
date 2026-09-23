@@ -17,7 +17,7 @@ A simple banking system REST API built with **Node.js**, **Express**, **Zod** (v
 - Transfer funds to another user — balances update on both sides atomically
 - Transaction history
 - CORS (configurable allowed origins)
-- Rate limiting (general, stricter on auth endpoints, stricter still on transfers)
+- Rate limiting (general, stricter on auth endpoints, stricter still on transfers, deposits, and withdrawals)
 - Zod request validation on every input-accepting route
 - Centralized error handling
 
@@ -49,6 +49,8 @@ banking-system-task/
     │   ├── createTransaction.js
     │   ├── getTransactionsForUser.js
     │   ├── transferFunds.js
+    │   ├── depositFunds.js
+    │   ├── withdrawFunds.js
     │   ├── users.js                       # barrel: user store + user functions
     │   ├── transactions.js                # barrel: tx store + tx functions
     │   └── db.js                          # barrel: full data API facade
@@ -60,6 +62,8 @@ banking-system-task/
     │   │   └── updatePinSchema.js
     │   ├── transaction/
     │   │   ├── transferSchema.js
+    │   │   ├── depositSchema.js
+    │   │   ├── withdrawSchema.js
     │   │   └── searchQuerySchema.js
     │   └── authSchema.js                  # barrel
     ├── middlewares/
@@ -71,7 +75,9 @@ banking-system-task/
     │   └── limiters/
     │       ├── generalLimiter.js
     │       ├── authLimiter.js
-    │       └── transferLimiter.js
+    │       ├── transferLimiter.js
+    │       ├── depositLimiter.js
+    │       └── withdrawLimiter.js
     ├── controllers/
     │   ├── auth/
     │   │   ├── register.js
@@ -84,6 +90,8 @@ banking-system-task/
     │   │   └── search.js
     │   ├── transaction/
     │   │   ├── transfer.js
+    │   │   ├── deposit.js
+    │   │   ├── withdraw.js
     │   │   └── history.js
     │   └── userController.js              # barrel
     ├── routes/
@@ -144,6 +152,8 @@ All request bodies are JSON. All protected routes require `Authorization: Bearer
 | Method | Route                        | Body                                | Notes                                              |
 |--------|------------------------------|-------------------------------------|----------------------------------------------------|
 | POST   | `/api/transactions/transfer` | `toAccountNumber, amount, pin, note?` | Debits sender, credits recipient, requires PIN   |
+| POST   | `/api/transactions/deposit`  | `amount, pin, note?`                | Credits the authenticated user's account, requires PIN |
+| POST   | `/api/transactions/withdraw` | `amount, pin, note?`                | Debits the authenticated user's account, requires PIN |
 | GET    | `/api/transactions/history`  | —                                   | All transactions involving the current user        |
 
 ## How a transfer stays consistent without a real DB

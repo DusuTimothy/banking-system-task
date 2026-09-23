@@ -12,6 +12,8 @@ const {
   createTransaction,
   getTransactionsForUser,
   transferFunds,
+  depositFunds,
+  withdrawFunds,
 } = require("./transactions");
 
 module.exports = {
@@ -25,4 +27,6 @@ module.exports = {
   createTransaction,
   getTransactionsForUser,
   transferFunds,
+  depositFunds,
+  withdrawFunds,
 };
