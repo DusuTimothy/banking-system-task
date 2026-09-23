@@ -12,6 +12,8 @@ A simple banking system REST API built with **Node.js**, **Express**, **Zod** (v
 ## Features
 
 - Register / Login with JWT auth
+- Roles: new users get `role: "user"`; admins can be assigned via a PUT route
+- Admins can add or reduce any user's balance (no PIN required)
 - View balance
 - Create & update a 4-digit transaction PIN (bcrypt-hashed, separate from the login password)
 - Search for other users (by name, email, or account number) to send money to
@@ -41,11 +43,13 @@ banking-system-task/
     │   ├── createUser.js
     │   ├── findUserByEmail.js
     │   ├── searchUsers.js
+    │   ├── updateUserRole.js
     │   ├── createTransaction.js
     │   ├── getTransactionsForUser.js
     │   ├── transferFunds.js
     │   ├── depositFunds.js
     │   ├── withdrawFunds.js
+    │   ├── adjustBalance.js
     │   ├── users.js                       # user store + finders + toPublicUser
     │   ├── transactions.js                # tx store + tx functions
     │   └── db.js                          # full data API facade
@@ -55,6 +59,9 @@ banking-system-task/
     │   │   ├── loginSchema.js
     │   │   ├── createPinSchema.js
     │   │   └── updatePinSchema.js
+    │   ├── user/
+    │   │   ├── assignRoleSchema.js
+    │   │   └── adjustBalanceSchema.js
     │   └── transaction/
     │       ├── transferSchema.js
     │       ├── depositSchema.js
@@ -81,7 +88,9 @@ banking-system-task/
     │   │   ├── getBalance.js
     │   │   ├── createPin.js
     │   │   ├── updatePin.js
-    │   │   └── search.js
+    │   │   ├── search.js
+    │   │   ├── assignRole.js
+    │   │   └── adjustBalance.js
     │   └── transaction/
     │       ├── transfer.js
     │       ├── deposit.js
@@ -121,18 +130,20 @@ All request bodies are JSON. All protected routes require `Authorization: Bearer
 
 | Method | Route                | Body                         | Notes                                      |
 |--------|----------------------|------------------------------|--------------------------------------------|
-| POST   | `/api/auth/register` | `fullName, email, password`  | Password needs upper/lower/digit, 8+ chars |
+| POST   | `/api/auth/register` | `fullName, email, password`  | Creates user with `role: "user"`; password needs upper/lower/digit, 8+ chars |
 | POST   | `/api/auth/login`    | `email, password`            | Returns `{ user, token }`                  |
 
 ### Users (protected)
 
 | Method | Route                   | Body / Query                            | Notes                                         |
 |--------|-------------------------|-----------------------------------------|-----------------------------------------------|
-| GET    | `/api/users/me`         | —                                       | Current user profile                          |
+| GET    | `/api/users/me`         | —                                       | Current user profile (includes `role`)        |
 | GET    | `/api/users/balance`    | —                                       | `{ balance, accountNumber }`                  |
 | GET    | `/api/users/search?q=`  | query: `q` (required), `limit` (opt)    | Search users by name/email/account number     |
 | POST   | `/api/users/pin`        | `pin` (4 digits)                        | Create PIN (only if none set yet)             |
 | PATCH  | `/api/users/pin`        | `currentPin, newPin`                    | Update existing PIN                           |
+| PUT    | `/api/users/:id/role`   | `role` (`"user"` \| `"admin"`)          | Assign role. While no admin exists, any authenticated user may call this (bootstrap); afterward, admin-only |
+| PUT    | `/api/users/:id/balance`| `amount, operation` (`"add"` \| `"reduce"`), `note?` | Admin-only. Add or reduce a user's balance (no PIN). Returns `{ transaction, newBalance, user }` |
 
 ### Transactions (protected)
 

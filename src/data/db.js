@@ -6,6 +6,8 @@ const {
   findUserByAccountNumber,
   searchUsers,
   toPublicUser,
+  updateUserRole,
+  hasAnyAdmin,
 } = require("./users");
 
 const {
@@ -15,6 +17,7 @@ const {
   transferFunds,
   depositFunds,
   withdrawFunds,
+  adjustBalance,
 } = require("./transactions");
 
 module.exports = {
@@ -26,9 +29,12 @@ module.exports = {
   findUserByAccountNumber,
   searchUsers,
   toPublicUser,
+  updateUserRole,
+  hasAnyAdmin,
   createTransaction,
   getTransactionsForUser,
   transferFunds,
   depositFunds,
   withdrawFunds,
+  adjustBalance,
 };

@@ -20,7 +20,10 @@ module.exports = { users, findUserById, findUserByAccountNumber, toPublicUser };
 const { createUser } = require("./createUser");
 const { findUserByEmail } = require("./findUserByEmail");
 const { searchUsers } = require("./searchUsers");
+const { updateUserRole, hasAnyAdmin } = require("./updateUserRole");
 
 module.exports.createUser = createUser;
 module.exports.findUserByEmail = findUserByEmail;
 module.exports.searchUsers = searchUsers;
+module.exports.updateUserRole = updateUserRole;
+module.exports.hasAnyAdmin = hasAnyAdmin;
